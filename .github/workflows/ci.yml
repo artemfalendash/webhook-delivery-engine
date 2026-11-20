@@ -1,0 +1,32 @@
+# CI: every time code is pushed to GitHub, a fresh GitHub computer runs all the tests.
+# It does exactly what you do locally: start the containers, then run pytest inside "api".
+name: CI
+
+on:
+  push:            # any push to any branch
+  pull_request:    # and any pull request
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest   # a clean Linux machine, thrown away after the run
+
+    steps:
+      - name: Download the code
+        uses: actions/checkout@v4
+
+      - name: Create .env from the template
+        run: cp .env.example .env
+
+      - name: Start Postgres, Redis and the API
+        # --wait = don't continue until Postgres and Redis pass their health checks
+        run: docker compose up -d --build --wait db redis api
+
+      - name: Create the test database
+        run: docker compose exec -T db createdb -U postgres distribution_api_test
+
+      - name: Run the tests
+        run: docker compose exec -T api pytest
+
+      - name: Show container logs if something failed
+        if: failure()
+        run: docker compose logs
