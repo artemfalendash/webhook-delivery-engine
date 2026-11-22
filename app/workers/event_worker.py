@@ -44,12 +44,6 @@ async def process_event(event_id: str, redis_client) -> None:
         print(f"✅ Created {len(deliveries)} pending delivery record(s) for Event {event.id}!")
 
 
-
-
-
-
-
-
 async def run_worker() -> None:
     print("🚀 Background Event Worker starting up...")
 
@@ -91,13 +85,8 @@ if __name__ == "__main__":
     asyncio.run(run_worker())
 
 
-
-
-
-
 """
 Explanations:
-
 
 
 Why create a Redis client inside the worker instead of get_redis()?
@@ -106,11 +95,6 @@ FastAPI's get_redis() relies on FastAPI's app state/lifespan created when Uvicor
 The worker process runs in a completely separate OS process (a different terminal, different PID) outside of Uvicorn. 
 Uvicorn and FastAPI do not exist inside this terminal process, so FastAPI's dependency injection does not exist here. 
 The worker must open its own dedicated TCP socket connection to Redis.
-
-
-
-
-
 
 
 blpop Breakdown
@@ -129,13 +113,6 @@ timeout=10: Redis would wait 10 seconds. If no item arrives within 10 seconds, b
 forcing your while True loop to start a new iteration.
 
 
-
-
-
-
-
-
-
 Is result a key-value pair?
 
 No. result is a native Python 2-element tuple returned by Redis BLPOP. It looks like this:
@@ -145,10 +122,6 @@ Python
 Element 0: The name of the Redis queue key where the item was found ("events_queue").
 
 Element 1: The raw JSON string value popped off the queue ('{"event_id": "..."}').
-
-
-
-
 
 
 Tuple Unpacking & The Unused Variable
@@ -165,27 +138,9 @@ Why Redis gives us queue_name: BLPOP allows you to listen to multiple queues at 
 Redis includes the queue name in the output so the consumer knows which queue delivered the item.
 
 
-
-
-
-
-
-
-
-
-
 Function: json.loads stands for "load string". It performs deserialization—the exact reverse of json.dumps.
 Input: The serialized string '{"event_id": "44a4..."}' (<class 'str'>).
 Output: A native Python dictionary {"event_id": "44a4..."} (<class 'dict'>).
-
-
-
-
-
-
-
-
-
 
 
 Why if __name__ == "__main__":?
@@ -199,46 +154,4 @@ If another file imports this script (import app.workers.event_worker): Python se
 The condition evaluates to False, so the worker loop does not run automatically upon import.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

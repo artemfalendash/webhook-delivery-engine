@@ -13,4 +13,3 @@ class EventResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}  # Modern Pydantic v2 syntax
-

@@ -10,7 +10,6 @@ import redis.asyncio as aioredis
 from app.core.redis import get_redis
 
 
-
 router = APIRouter()
 
 @router.post("", response_model=EventResponse, status_code=status.HTTP_202_ACCEPTED)

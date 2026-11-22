@@ -14,10 +14,7 @@ from app.core.redis import redis_client
 from app.core.rate_limiter import extract_domain, is_rate_limited
 
 
-
 MAX_RETRIES = 5
-
-
 
 
 async def schedule_retry(redis_client, delivery_id: str, attempt_number: int):
@@ -73,25 +70,6 @@ async def handle_delivery_failure(redis_client, sessionx, delivery: models.Deliv
         await sessionx.commit()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###############################################################################################################################################################################
-
-
-
 async def process_delivery(delivery_id: str, redis_client) -> None:
     async with AsyncSessionLocal() as sessionx:
         search_query = (
@@ -117,7 +95,6 @@ async def process_delivery(delivery_id: str, redis_client) -> None:
             return
 
 
-
         domain = extract_domain(webhook.target_url)
 
         if await is_rate_limited(redis_client, domain):
@@ -129,7 +106,6 @@ async def process_delivery(delivery_id: str, redis_client) -> None:
             await redis_client.zadd("delayed_deliveries", {job_payload: now + 2})
             
             return
-
 
 
         # Serialize once: these exact bytes are both signed and sent
@@ -164,7 +140,6 @@ async def process_delivery(delivery_id: str, redis_client) -> None:
             sessionx.add(delivery_attempt)
 
 
-
             if 200 <= response.status_code < 300:
                 delivery.status = "success"
                 print(f"✅ [SUCCESS] Delivery: {delivery_id} | Status: {response.status_code}")
@@ -192,16 +167,6 @@ async def process_delivery(delivery_id: str, redis_client) -> None:
             await handle_delivery_failure(redis_client, sessionx, delivery)
 
         await sessionx.commit()
-
-
-
-
-
-
-
-################################################################################################################################################
-
-
 
 
 async def run_delivery_worker() -> None:
